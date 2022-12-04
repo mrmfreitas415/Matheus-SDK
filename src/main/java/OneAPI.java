@@ -11,7 +11,7 @@ import java.security.InvalidParameterException;
 import java.util.Arrays;
 
 /**
- * You can use this SDK using maven
+ * You can use this SDK using maven. <br/>
  * Copy OneApiSdk.jar to ${project.basedir}/src/main/resources/.<br/>
  * Put this code to pom.xml<br/>
  * &lt;dependencies&gt; <br/>
@@ -59,7 +59,7 @@ public class OneAPI {
   */
 
   /**
-   * call OneApi without an access token
+   * call OneApi with or without an access token.
    * for example, when uri is "https://the-one-api.dev/v2/book/",
    * return value is
    * "{
@@ -83,57 +83,59 @@ public class OneAPI {
    *     "page": 1,
    *     "pages": 1
    * }"
+   * The parameters are uri, access token, and modifiers. Number of parameters is variable.
+   * The first parameter is uri, and the second access token, the rest are modifiers.
+   * If you don't need to pass access token, just pass any string for access token.
+   * possible uris are <br/>
+   * "https://the-one-api.dev/v2/book/", or just "/book", or "book" <br/>
+   * "https://the-one-api.dev/v2/book/{id}", or just "/book/{id}", or "book/{id}"<br/>
+   * "https://the-one-api.dev/v2/book/{id}/chapter", or just "/book/{id}/chapter", or "book/{id}/chapter"<br/>
+   * "https://the-one-api.dev/v2/movie/", "movie", "/movie", <br/>
+   * "https://the-one-api.dev/v2/movie/{id}", "movie", "/movie", <br/>
+   * "https://the-one-api.dev/v2/movie/{id}/quote", "movie/{id}/quote", "/movie/{id}/quote", <br/>
+   * "https://the-one-api.dev/v2/character/", "character", "/character", <br/>
+   * "https://the-one-api.dev/v2/character/{id}", "character/{id}", "/character/{id}", <br/>
+   * "https://the-one-api.dev/v2/character/{id}/quote", "character/{id}/quote", "/character/{id}/quote", <br/>
+   * "https://the-one-api.dev/v2/quote/", "quote", "/quote", <br/>
+   * "https://the-one-api.dev/v2/quote/{id}", "quote/{id}", "/quote/{id}", <br/>
+   * "https://the-one-api.dev/v2/chapter/", "chapter", "/chapter", <br/>
+   * "https://the-one-api.dev/v2/chapter/{id}", "chapter/{id}", "/chapter/{id}", <br/>
+   * with <b>pagination, sort, and filter</b><br/>
+   * <b>pagination example</b><br/>
+   * "https://the-one-api.dev/v2/book/5cf5805fb53e011a64671582/chapter", modifier="?page=2&limit=11", <br/>
+   * "https://the-one-api.dev/v2/book/5cf5805fb53e011a64671582/chapter", modifiers="?limit=5", "&offset=3"<br/>
+   * Default values for page, limit, offset are 1, 1000, and 0.<br/>
+   * <b>offset</b> and <b>page</b> do not work at the same time and <b>offset</b> has higher priority.<br/>
+   *
+   * <b>sort example uri</b><br/>
+   *  You can sort in ascending or descending order. <i>:asc</i> and <i>:desc</i> are used respectively.
+   * "https://the-one-api.dev/v2/book/5cf5805fb53e011a64671582/chapter", modifiers="?sort=chapterName:asc", "&limit=5", "&page=1",<br/>
+   * "https://the-one-api.dev/v2/book/5cf5805fb53e011a64671582/chapter", modifiers="?sort=chapterName:desc&limit=5", "&page=1"<br/>
+   *
+   * <b>filter example uri</b><br/>
+   * You can include, exclude by full matching or regex-base matching. You can filter by numeric comparing as well.<br/>
+   * Including: "https://the-one-api.dev/v2/character?name=Legolas", <br/>
+   * Including: "https://the-one-api.dev/v2/character?name=Legolas,Gandalf", <br/>
+   * Excluding: "https://the-one-api.dev/v2/character?name!=Legolas,Gandalf&limit=5&sort=name:desc",<br/>
+   * Regex-based Including: "https://the-one-api.dev/v2/character?name=/^Ga/&limit=3",<br/>
+   * Regex-based Including: "https://the-one-api.dev/v2/character?name=/gan/i&limit=3",<br/>
+   * Regex-based Including: "https://the-one-api.dev/v2/character?race=Human&name=/^B/",<br/>
+   * Regex-based Including: "https://the-one-api.dev/v2/character?name=/n$/i&limit=3",<br/>
+   * Regex-based Excluding: "https://the-one-api.dev/v2/character?name!=/n$/i&limit=3",<br/>
+   * Regex-based Include and Exclude: "https://the-one-api.dev/v2/character?name!=/^A/&name=/n$/&limit=5"
+   * Filter by Numeric Compare: "https://the-one-api.dev/v2//movie?budgetInMillions<100",<br/>
+   * Filter by Numeric Compare: "https://the-one-api.dev/v2/movie?runtimeInMinutes>=160",<br/>
+   *
+   * <b>Caution:</b><br/>
+   * -<i>exists</i> filter does not work for now. Examples of not-working uris are "/character?name" and "/character?!name", which means existence <br/>
+   * -<i>filter</i> fields are case-sensitive.<br/>
+   * -<i>filter</i> does not work for all endpoints. For example, filter does not work for "/book".
+   * To be more specific, "https://the-one-api.dev/v2/character?name=/^T/&limit=3" returns characters whose name starts with T,
+   * but "https://the-one-api.dev/v2/book/5cf5805fb53e011a64671582/chapter?chapterName=/^T/" just returns all chapters in the book.<br/>
+   * -Only the "/book" endpoint is available without authentication.</br>
+   * -Access for authenticated users to all endpoints is limited to 100 requests every 10 minutes.<br/>
+   *
    * @param parameters uri, access token, and modifiers like pagination, sort, and filter
-   *               The first parameter is uri, and the second access token, the rest are modifiers.
-   *               possible uris are
-   *               "https://the-one-api.dev/v2/book/", or just "/book", or "book" <br/>
-   *               "https://the-one-api.dev/v2/book/{id}", or just "/book/{id}", or "book/{id}"<br/>
-   *               "https://the-one-api.dev/v2/book/{id}/chapter", or just "/book/{id}/chapter", or "book/{id}/chapter"<br/>
-   *               "https://the-one-api.dev/v2/movie/", "movie", "/movie", <br/>
-   *               "https://the-one-api.dev/v2/movie/{id}", "movie", "/movie", <br/>
-   *               "https://the-one-api.dev/v2/movie/{id}/quote", "movie/{id}/quote", "/movie/{id}/quote", <br/>
-   *               "https://the-one-api.dev/v2/character/", "character", "/character", <br/>
-   *               "https://the-one-api.dev/v2/character/{id}", "character/{id}", "/character/{id}", <br/>
-   *               "https://the-one-api.dev/v2/character/{id}/quote", "character/{id}/quote", "/character/{id}/quote", <br/>
-   *               "https://the-one-api.dev/v2/quote/", "quote", "/quote", <br/>
-   *               "https://the-one-api.dev/v2/quote/{id}", "quote/{id}", "/quote/{id}", <br/>
-   *               "https://the-one-api.dev/v2/chapter/", "chapter", "/chapter", <br/>
-   *               "https://the-one-api.dev/v2/chapter/{id}", "chapter/{id}", "/chapter/{id}", <br/>
-   *               with <b>pagination, sort, and filter</b><br/>
-   *               <b>pagination example</b><br/>
-   *               "https://the-one-api.dev/v2/book/5cf5805fb53e011a64671582/chapter", modifier="?page=2&limit=11", <br/>
-   *               "https://the-one-api.dev/v2/book/5cf5805fb53e011a64671582/chapter", modifiers="?limit=5", "&offset=3"<br/>
-   *               Default values for page, limit, offset are 1, 1000, and 0.<br/>
-   *               <b>offset</b> and <b>page</b> do not work at the same time and <b>offset</b> has higher priority.<br/>
-   *
-   *               <b>sort example uri</b><br/>
-   *                You can sort in ascending or descending order. <i>:asc</i> and <i>:desc</i> are used respectively.
-   *               "https://the-one-api.dev/v2/book/5cf5805fb53e011a64671582/chapter", modifiers="?sort=chapterName:asc", "&limit=5", "&page=1",<br/>
-   *               "https://the-one-api.dev/v2/book/5cf5805fb53e011a64671582/chapter", modifiers="?sort=chapterName:desc&limit=5", "&page=1"<br/>
-   *
-   *               <b>filter example uri</b><br/>
-   *               You can include, exclude by full matching or regex-base matching. You can filter by numeric comparing as well.<br/>
-   *               Including: "https://the-one-api.dev/v2/character?name=Legolas", <br/>
-   *               Including: "https://the-one-api.dev/v2/character?name=Legolas,Gandalf", <br/>
-   *               Excluding: "https://the-one-api.dev/v2/character?name!=Legolas,Gandalf&limit=5&sort=name:desc",<br/>
-   *               Regex-based Including: "https://the-one-api.dev/v2/character?name=/^Ga/&limit=3",<br/>
-   *               Regex-based Including: "https://the-one-api.dev/v2/character?name=/gan/i&limit=3",<br/>
-   *               Regex-based Including: "https://the-one-api.dev/v2/character?race=Human&name=/^B/",<br/>
-   *               Regex-based Including: "https://the-one-api.dev/v2/character?name=/n$/i&limit=3",<br/>
-   *               Regex-based Excluding: "https://the-one-api.dev/v2/character?name!=/n$/i&limit=3",<br/>
-   *               Regex-based Include and Exclude: "https://the-one-api.dev/v2/character?name!=/^A/&name=/n$/&limit=5"
-   *               Filter by Numeric Compare: "https://the-one-api.dev/v2//movie?budgetInMillions<100",<br/>
-   *               Filter by Numeric Compare: "https://the-one-api.dev/v2/movie?runtimeInMinutes>=160",<br/>
-   *
-   *               <b>Caution:</b><br/>
-   *               -<i>exists</i> filter does not work for now. Examples of not-working uris are "/character?name" and "/character?!name", which means existence <br/>
-   *               -<i>filter</i> fields are case-sensitive.<br/>
-   *               -<i>filter</i> does not work for all endpoints. For example, filter does not work for "/book".
-   *               To be more specific, "https://the-one-api.dev/v2/character?name=/^T/&limit=3" returns characters whose name starts with T,
-   *               but "https://the-one-api.dev/v2/book/5cf5805fb53e011a64671582/chapter?chapterName=/^T/" just returns all chapters in the book.<br/>
-   *               -Only the "/book" endpoint is available without authentication.</br>
-   *               -Access for authenticated users to all endpoints is limited to 100 requests every 10 minutes.<br/>
-   *
    * @return stringified json response
    * @throws URISyntaxException
    * @throws IOException
@@ -167,7 +169,7 @@ public class OneAPI {
    * when strUri is "https://the-one-api.dev/v2/books", return value is "https://the-one-api.dev/v2/books" <br/>
    * when strUri is "https://the-one-api.dev/v", return value is "https://the-one-api.dev/v2/https://the-one-api.dev/v" <br/>
    * when strUri is "https://the-one-api.dev/v/", return value is "https://the-one-api.dev/v2/https://the-one-api.dev/v/" <br/>
-   * @param strUri
+   * @param strUri user-input uri string
    * @return fixed uri
    */
   public static String fix(String strUri) {
@@ -193,7 +195,7 @@ public class OneAPI {
    *  int limit;<br/>
    * }<br/>
    * We can simply stringify a BookResponse instance using stringify()
-   * @param object
+   * @param object object to stringify
    * @return
    */
   public static String stringify(Object object) {
@@ -239,8 +241,8 @@ public class OneAPI {
    * System.out.println(bookResonse.total); //result is 3
    * System.out.println(bookResonse.limit); //result is 1000
    * System.out.println(bookResponse.books.get[0].name); //result is "The Fellowship Of The Ring"
-   * @param strJson
-   * @param type
+   * @param strJson json string to parse into an object
+   * @param type target object type
    * @return
    */
   public static Object parse(String strJson, Type type) {
